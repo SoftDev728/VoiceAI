@@ -1,5 +1,6 @@
 import os
-from typing import Optional, List, Dict, Any
+import json
+from typing import Optional
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from models import AppointmentData, AppointmentsResponse
@@ -17,19 +18,21 @@ class GoogleSheetsManager:
     def _initialize_connection(self) -> None:
         """Initialize Google Sheets connection with proper error handling"""
         try:
-            # Get the directory where this script is located
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            cred_path = os.path.join(current_dir, "..", Config.CREDENTIALS_FILE)
-            
-            # Check if credentials file exists
-            if not os.path.exists(cred_path):
-                print(f"❌ Credentials file not found at: {cred_path}")
+            # Load the credentials JSON string from environment variable
+            service_account_info = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+            if not service_account_info:
+                print("❌ GOOGLE_SERVICE_ACCOUNT_JSON env var not set")
                 return
             
-            # Load credentials and authorize client
-            credentials = ServiceAccountCredentials.from_json_keyfile_name(
-                cred_path, Config.GOOGLE_SCOPES
+            # Parse the JSON string into a dictionary
+            info = json.loads(service_account_info)
+            
+            # Create credentials from the dictionary
+            credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+                info, Config.GOOGLE_SCOPES
             )
+            
+            # Authorize gspread client
             self.client = gspread.authorize(credentials)
             
             try:
@@ -51,8 +54,8 @@ class GoogleSheetsManager:
                 print(f"❌ Error accessing spreadsheet: {sheet_error}")
                 print("🔧 Please check if the sheet is shared with your service account email")
                 
-        except FileNotFoundError:
-            print(f"❌ Credentials file not found: {cred_path}")
+        except json.JSONDecodeError:
+            print("❌ Invalid JSON in GOOGLE_SERVICE_ACCOUNT_JSON environment variable")
         except Exception as e:
             print(f"❌ Error initializing Google Sheets: {e}")
             print("🔧 Please check your credentials and internet connection")
