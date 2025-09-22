@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: voiceai-backend
+    env: python
+    region: oregon
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    autoDeploy: true
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GOOGLE_SHEETS_URL
+        sync: false
+      - key: CREDENTIALS_FILE
+        sync: false
+      - key: HOSPITAL_NAME
+        sync: false
+      - key: HOSPITAL_ADDRESS
+        sync: false
+      - key: HOSPITAL_PHONE
+        sync: false
+      - key: OPD_HOURS
+        sync: false
+      - key: LLM_MODEL_PROVIDER
+        sync: false
+      - key: LLM_MODEL
+        sync: false
+      - key: TTS_MODEL
+        sync: false
+      - key: TTS_VOICE
+        sync: false
+      - key: STT_MODEL
+        sync: false
