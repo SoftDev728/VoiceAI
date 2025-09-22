@@ -1,13 +1,10 @@
 services:
   - type: web
     name: voiceai-backend
-    env: python
+    env: docker  # Change this from 'python' to 'docker'
     region: oregon
     branch: main
-    buildCommand: |
-      apt-get update && apt-get install -y portaudio19-dev
-      pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT  # This is optional; Dockerfile CMD will also work
     autoDeploy: true
     envVars:
       - key: OPENAI_API_KEY
